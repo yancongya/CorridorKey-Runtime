@@ -28,12 +28,13 @@ constexpr AdobeStatus kAdobeStatusUnsupported = PF_Err_BAD_CALLBACK_PARAM;
 // generated metadata, but the packed version is computed by CMake while my_version is
 // computed by the AE SDK macro. Pin them together at compile time so an SDK macro change
 // cannot silently produce the "version mismatch" load failure (AE error 25::16).
-static_assert(
-    static_cast<std::uint32_t>(PF_VERSION(
-        corridorkey::adobe::kEffectVersionMajor, corridorkey::adobe::kEffectVersionMinor,
-        corridorkey::adobe::kEffectVersionBug, corridorkey::adobe::kEffectVersionStage,
-        corridorkey::adobe::kEffectVersionBuild)) == corridorkey::adobe::kEffectVersionPacked,
-    "Generated PiPL AE_Effect_Version must use the AE SDK PF_VERSION bit layout.");
+static_assert(static_cast<std::uint32_t>(PF_VERSION(corridorkey::adobe::kEffectVersionMajor,
+                                                    corridorkey::adobe::kEffectVersionMinor,
+                                                    corridorkey::adobe::kEffectVersionBug,
+                                                    corridorkey::adobe::kEffectVersionStage,
+                                                    corridorkey::adobe::kEffectVersionBuild)) ==
+                  corridorkey::adobe::kEffectVersionPacked,
+              "Generated PiPL AE_Effect_Version must use the AE SDK PF_VERSION bit layout.");
 static_assert(corridorkey::adobe::kGlobalOutFlags == PF_OutFlag_DEEP_COLOR_AWARE,
               "Generated global out flags must match the deep-color capability implemented here.");
 static_assert(
