@@ -18,6 +18,13 @@ project(CorridorKey-Runtime
     LANGUAGES CXX
 )
 
+if(MSVC)
+    # MSVC on DBCS code pages (for example CP936) reports C4819 for UTF-8
+    # sources. Targets that build with /WX then fail before compiling any code.
+    # Force the UTF-8 source and execution charset for the whole tree.
+    string(APPEND CMAKE_CXX_FLAGS " /utf-8")
+endif()
+
 set(CORRIDORKEY_DISPLAY_VERSION_LABEL "" CACHE STRING
     "Optional user-facing build label for local optimization checkpoint builds")
 
