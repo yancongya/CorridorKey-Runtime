@@ -1027,8 +1027,24 @@ function Get-CorridorKeyDerivedDisplayLabel {
     }
 
     $gitArgs = @("-C", $RepoRoot, "describe", "--tags", "--dirty", "--match", $PlatformMatch)
-    $rawLabel = & git @gitArgs 2>$null
-    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($rawLabel)) {
+    # PowerShell 7.3+ turns native stderr into error records. With the canonical
+    # wrapper's ErrorActionPreference=Stop, a shallow clone without a reachable tag
+    # would throw here instead of reaching the fallback below.
+    $nativeErrorPreferenceVariable = Get-Variable -Name PSNativeCommandUseErrorActionPreference -ErrorAction SilentlyContinue
+    $previousNativeErrorPreference = $null
+    if ($null -ne $nativeErrorPreferenceVariable) {
+        $previousNativeErrorPreference = $nativeErrorPreferenceVariable.Value
+        $PSNativeCommandUseErrorActionPreference = $false
+    }
+    try {
+        $rawLabel = & git @gitArgs 2>$null
+        $describeExitCode = $LASTEXITCODE
+    } finally {
+        if ($null -ne $nativeErrorPreferenceVariable) {
+            $PSNativeCommandUseErrorActionPreference = $previousNativeErrorPreference
+        }
+    }
+    if ($describeExitCode -ne 0 -or [string]::IsNullOrWhiteSpace($rawLabel)) {
         if ([string]::IsNullOrWhiteSpace($resolvedVersion)) {
             return ""
         }
