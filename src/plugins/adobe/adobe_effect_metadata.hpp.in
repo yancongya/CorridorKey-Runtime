@@ -15,6 +15,10 @@ inline constexpr std::int32_t kEffectVersionMinor = @CORRIDORKEY_ADOBE_EFFECT_VE
 inline constexpr std::int32_t kEffectVersionBug = @CORRIDORKEY_ADOBE_EFFECT_VERSION_BUG@;
 inline constexpr std::int32_t kEffectVersionStage = @CORRIDORKEY_ADOBE_EFFECT_VERSION_STAGE@;
 inline constexpr std::int32_t kEffectVersionBuild = @CORRIDORKEY_ADOBE_EFFECT_VERSION_BUILD@;
+// Packed with the same CMake bit layout that generates AE_Effect_Version in the PiPL
+// resource. adobe_effect.cpp compares it against the AE SDK PF_VERSION macro at
+// compile time so a layout drift fails the build instead of AE error 25::16 at load.
+inline constexpr std::uint32_t kEffectVersionPacked = @CORRIDORKEY_ADOBE_EFFECT_VERSION@U;
 inline constexpr std::int32_t kGlobalOutFlags = @CORRIDORKEY_ADOBE_GLOBAL_OUTFLAGS@;
 inline constexpr std::int32_t kGlobalOutFlags2 = @CORRIDORKEY_ADOBE_GLOBAL_OUTFLAGS2@;
 

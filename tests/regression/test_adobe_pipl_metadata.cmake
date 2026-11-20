@@ -44,10 +44,28 @@ foreach(_placeholder
         CORRIDORKEY_ADOBE_EFFECT_VERSION_MINOR
         CORRIDORKEY_ADOBE_EFFECT_VERSION_BUG
         CORRIDORKEY_ADOBE_EFFECT_VERSION_STAGE
-        CORRIDORKEY_ADOBE_EFFECT_VERSION_BUILD)
+        CORRIDORKEY_ADOBE_EFFECT_VERSION_BUILD
+        CORRIDORKEY_ADOBE_EFFECT_VERSION)
     if(NOT _metadata_text MATCHES "@${_placeholder}@")
         message(FATAL_ERROR
             "Metadata template does not contain @${_placeholder}@.")
+    endif()
+endforeach()
+
+if(NOT _pipl_text MATCHES "AE_Effect_Version[ \t\r\n]*\\{[ \t\r\n]*@CORRIDORKEY_ADOBE_EFFECT_VERSION@")
+    message(FATAL_ERROR
+        "PiPL template must use the generated packed AE_Effect_Version value.")
+endif()
+
+foreach(_guard_symbol
+        kEffectVersionPacked
+        PF_VERSION
+        PF_OutFlag_DEEP_COLOR_AWARE
+        PF_OutFlag2_SUPPORTS_SMART_RENDER
+        PF_OutFlag2_FLOAT_COLOR_AWARE)
+    if(NOT _effect_text MATCHES "${_guard_symbol}")
+        message(FATAL_ERROR
+            "Effect source must pin PiPL metadata to the AE SDK with ${_guard_symbol}.")
     endif()
 endforeach()
 

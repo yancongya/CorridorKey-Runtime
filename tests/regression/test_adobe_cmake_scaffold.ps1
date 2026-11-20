@@ -254,6 +254,12 @@ struct PF_LayerDef {};
     if ($generatedPiplText -notmatch 'AE_Effect_Version\s+\{\s+524289\s+\}') {
         throw "Expected Adobe PiPL scaffold to use the PF_VERSION(1,0,0,0,1) encoded value."
     }
+    if ($generatedPiplText -notmatch 'AE_Effect_Global_OutFlags\s+\{\s+(?:\(1 << 25\)|33554432)\s+\}') {
+        throw "Expected Adobe PiPL scaffold to declare the generated deep-color out flag."
+    }
+    if ($generatedPiplText -notmatch 'AE_Effect_Global_OutFlags_2\s+\{\s+5120\s+\}') {
+        throw "Expected Adobe PiPL scaffold to declare the generated SmartFX out flag 2."
+    }
 
     Write-Host "[PASS] Adobe CMake scaffold regression checks passed." -ForegroundColor Green
 } finally {

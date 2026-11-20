@@ -24,6 +24,23 @@ constexpr AdobeStatus kAdobeStatusOk = static_cast<AdobeStatus>(0);
 constexpr AdobeStatus kAdobeStatusFailed = PF_Err_INTERNAL_STRUCT_DAMAGED;
 constexpr AdobeStatus kAdobeStatusUnsupported = PF_Err_BAD_CALLBACK_PARAM;
 
+// The PiPL resource and PF_Cmd_GLOBAL_SETUP must describe the same effect. Both consume
+// generated metadata, but the packed version is computed by CMake while my_version is
+// computed by the AE SDK macro. Pin them together at compile time so an SDK macro change
+// cannot silently produce the "version mismatch" load failure (AE error 25::16).
+static_assert(
+    static_cast<std::uint32_t>(PF_VERSION(
+        corridorkey::adobe::kEffectVersionMajor, corridorkey::adobe::kEffectVersionMinor,
+        corridorkey::adobe::kEffectVersionBug, corridorkey::adobe::kEffectVersionStage,
+        corridorkey::adobe::kEffectVersionBuild)) == corridorkey::adobe::kEffectVersionPacked,
+    "Generated PiPL AE_Effect_Version must use the AE SDK PF_VERSION bit layout.");
+static_assert(corridorkey::adobe::kGlobalOutFlags == PF_OutFlag_DEEP_COLOR_AWARE,
+              "Generated global out flags must match the deep-color capability implemented here.");
+static_assert(
+    corridorkey::adobe::kGlobalOutFlags2 ==
+        (PF_OutFlag2_SUPPORTS_SMART_RENDER | PF_OutFlag2_FLOAT_COLOR_AWARE),
+    "Generated global out flags 2 must match the SmartFX and float capabilities implemented here.");
+
 struct HostHandleCallbacks {
     PF_Handle (*new_handle)(A_u_longlong) = nullptr;
     void* (*lock_handle)(PF_Handle) = nullptr;
@@ -183,6 +200,13 @@ CORRIDORKEY_ADOBE_EXPORT AdobeStatus EffectMain(PF_Cmd command, PF_InData* input
         }
         return kAdobeStatusOk;
     } catch (...) {
+        // Keep the failure inside the plugin: report it through the host error surface
+        // instead of surfacing an opaque internal-struct error with no diagnosis path.
+        if (output_data != nullptr) {
+            set_error_message(*output_data,
+                              "CorridorKey contained an internal error; check adobe.log and the "
+                              "host plugin runtime log.");
+        }
         return kAdobeStatusFailed;
     }
 }
